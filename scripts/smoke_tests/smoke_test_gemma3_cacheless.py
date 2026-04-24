@@ -1,10 +1,14 @@
 import torch
 from PIL import Image
 from transformers import AutoProcessor, Gemma3ForConditionalGeneration
+import os
 
 MODEL_ID = "google/gemma-3-4b-it"
-IMAGE_PATH = "image.jpg"
-CACHE_DIR = "/tmp/$USER/hf-cache/hub"
+# IMAGE_PATH = "image.jpg"
+IMAGE_PATH = "image.png"
+# CACHE_DIR = "/tmp/$USER/hf-cache/hub"
+os.environ["HF_HOME"] = f"/tmp/{os.environ['USER']}/hf-cache"
+CACHE_DIR = os.environ["HF_HOME"]
 
 processor = AutoProcessor.from_pretrained(
     MODEL_ID,
