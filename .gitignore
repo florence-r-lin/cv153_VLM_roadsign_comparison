@@ -1,5 +1,30 @@
-kaggle.json
+# Datasets
+data/traffic_signs/
+data/us_road_signs/
+data/processed/
+
+# Outputs
+outputs/predictions/
+outputs/metrics/
+
+# Kaggle
 .kaggle/
-traffic_data
-.ipynb_checkpoints
-traffic-sign-dataset-classification.zip
+kaggle.json
+
+# Python
+__pycache__/
+*.py[cod]
+.eggs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+nohup.out

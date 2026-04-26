@@ -1,0 +1,13 @@
+torch
+torchvision
+transformers>=4.45.0
+accelerate
+huggingface_hub
+pillow
+pandas
+numpy
+matplotlib
+kaggle
+nltk
+jupyter
+ipykernel
