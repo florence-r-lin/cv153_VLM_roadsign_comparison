@@ -25,7 +25,7 @@ HF_CACHE_DIR = f"/tmp/{os.environ.get('USER', 'user')}/hf-cache/hub"
 
 MAX_NEW_TOKENS  = 64
 NUM_EVAL_IMAGES = 200
-RANDOM_SEED     = 42
+RANDOM_SEED = 42
 
 TEXT_SIGNS = {
     "Speed limit (15km/h)", "Speed limit (30km/h)", "Speed limit (40km/h)",
