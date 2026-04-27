@@ -1,142 +1,117 @@
 """
-evaluate.py
-Computes Top-1, Top-N accuracy and BLEU for both models.
-Splits evaluation into text signs (have readable text) vs symbol signs (no text).
+evaluate.py exact match + BLEU.
+Outputs per image results table and aggregated summary
 
 Usage:
     python scripts/evaluate.py --prompt_type text_extraction
     python scripts/evaluate.py --prompt_type meaning
 """
-import os
-import sys
-import re
-import json
-import argparse
+import os, sys, re, argparse
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config import PREDS_DIR, METRICS_DIR, TOP_N
-
-# ── Sign categorization ───────────────────────────────────────────────────────
-TEXT_SIGNS = {
-    "Speed limit (15km/h)", "Speed limit (30km/h)", "Speed limit (40km/h)",
-    "Speed limit (50km/h)", "Speed limit (5km/h)", "Speed limit (60km/h)",
-    "Speed limit (70km/h)", "speed limit (80km/h)", "Give Way", "No entry",
-    "No stopping", "Horn", "No horn", "No Car", "No Uturn",
-    "Danger Ahead", "Under Construction",
-}
+from config import PREDS_DIR, METRICS_DIR, TEXT_SIGNS
 
 try:
     from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
     _sf = SmoothingFunction().method1
     def _bleu(pred, ref):
-        r = _norm(ref).split()
-        h = _norm(pred).split()
-        if not h or not r:
-            return 0.0
-        return sentence_bleu([r], h, smoothing_function=_sf)
+        r = _norm(ref).split(); h = _norm(pred).split()
+        return sentence_bleu([r], h, smoothing_function=_sf) if h and r else 0.0
 except ImportError:
     def _bleu(pred, ref):
-        r = set(_norm(ref).split())
-        h = _norm(pred).split()
-        if not h or not r:
-            return 0.0
-        return sum(1 for w in h if w in r) / len(h)
+        r = set(_norm(ref).split()); h = _norm(pred).split()
+        return sum(1 for w in h if w in r) / len(h) if h and r else 0.0
 
 
 def _norm(text):
+    """Lowercase and strip punctuation before exact match."""
     text = str(text).lower()
     text = re.sub(r"[^\w\s]", "", text)
     return re.sub(r"\s+", " ", text).strip()
 
 
-def _match(pred, label):
-    return _norm(label) in _norm(pred)
+def _exact_match(pred, label):
+    if "km/h" in str(label).lower():
+        nums = re.findall(r"\d+", str(label))
+        return any(n in str(pred) for n in nums)
+    return _norm(label) in _norm(str(pred))
 
 
-def _match_numeric(pred, label):
-    nums = re.findall(r"\d+", label)
-    if not nums:
-        return _match(pred, label)
-    return any(n in pred for n in nums)
+def build_results_table(df, model_name):
+    # Handle old column name from previous runs
+    if "pred_1" in df.columns and "prediction" not in df.columns:
+        df = df.rename(columns={"pred_1": "prediction"})
+    df = df.copy()
+    df["model"]       = model_name
+    df["sign_type"]   = df["label_name"].apply(
+        lambda x: "text_sign" if x in TEXT_SIGNS else "symbol_sign"
+    )
+    df["exact_match"] = df.apply(
+        lambda r: _exact_match(r["prediction"], r["label_name"]), axis=1
+    )
+    df["bleu_score"]  = df.apply(
+        lambda r: round(_bleu(r["prediction"], r["label_name"]), 4), axis=1
+    )
+    return df
 
 
-def compute_metrics(df, model_name, top_n, subset_name):
-    if len(df) == 0:
-        return None
-    pred_cols = [f"pred_{j+1}" for j in range(top_n) if f"pred_{j+1}" in df.columns]
-    n = len(df)
-
-    def match_row(row):
-        if "km/h" in str(row["label_name"]).lower():
-            return _match_numeric(row["pred_1"], row["label_name"])
-        return _match(row["pred_1"], row["label_name"])
-
-    def match_topn(row):
-        if "km/h" in str(row["label_name"]).lower():
-            return any(_match_numeric(row[c], row["label_name"]) for c in pred_cols)
-        return any(_match(row[c], row["label_name"]) for c in pred_cols)
-
-    top1  = sum(match_row(row) for _, row in df.iterrows())
-    topn  = sum(match_topn(row) for _, row in df.iterrows())
-    bleus = [_bleu(row["pred_1"], row["label_name"]) for _, row in df.iterrows()]
-
-    return {
-        "model":    model_name,
-        "subset":   subset_name,
-        "n_images": n,
-        "top1_accuracy": round(top1 / n, 4),
-        f"top{len(pred_cols)}_accuracy": round(topn / n, 4),
-        "avg_bleu": round(sum(bleus) / n, 4),
-    }
-
-
-def print_table(results):
-    if not results:
-        return
-    headers = list(results[0].keys())
-    print("\n" + "─" * 72)
-    print("  " + "  ".join(f"{h:<18}" for h in headers))
-    print("─" * 72)
-    for r in results:
-        print("  " + "  ".join(f"{str(v):<18}" for v in r.values()))
-    print("─" * 72)
+def summarize(df):
+    rows = []
+    for subset, sub_df in [
+        ("all",          df),
+        ("text_signs",   df[df["sign_type"] == "text_sign"]),
+        ("symbol_signs", df[df["sign_type"] == "symbol_sign"]),
+    ]:
+        if len(sub_df) == 0:
+            continue
+        rows.append({
+            "model":           sub_df["model"].iloc[0],
+            "subset":          subset,
+            "n_images":        len(sub_df),
+            "exact_match_pct": round(sub_df["exact_match"].mean() * 100, 2),
+            "avg_bleu":        round(sub_df["bleu_score"].mean(), 4),
+        })
+    return pd.DataFrame(rows)
 
 
 def main(prompt_type):
-    all_results = []
+    all_tables, all_summaries = [], []
+
     for model_name in ["gemma3", "gemma4"]:
         path = os.path.join(PREDS_DIR, f"{model_name}_{prompt_type}.csv")
         if not os.path.isfile(path):
             print(f"Skipping {model_name} — {path} not found.")
             continue
-        df = pd.read_csv(path)
-        df_text   = df[df["label_name"].isin(TEXT_SIGNS)]
-        df_symbol = df[~df["label_name"].isin(TEXT_SIGNS)]
-        for subset_df, subset_name in [
-            (df,        "all"),
-            (df_text,   "text_signs"),
-            (df_symbol, "symbol_signs"),
-        ]:
-            m = compute_metrics(subset_df, model_name, TOP_N, subset_name)
-            if m:
-                all_results.append(m)
+        table   = build_results_table(pd.read_csv(path), model_name)
+        summary = summarize(table)
+        all_tables.append(table)
+        all_summaries.append(summary)
 
-    if not all_results:
+    if not all_tables:
         print("No prediction files found. Run run_gemma3.py and run_gemma4.py first.")
         return
 
-    print(f"\nResults — prompt_type: {prompt_type}")
-    print_table(all_results)
+    combined_table   = pd.concat(all_tables,     ignore_index=True)
+    combined_summary = pd.concat(all_summaries,  ignore_index=True)
+
+    # Print summary
+    print(f"\nResults — {prompt_type}")
+    print("─" * 60)
+    print(f"  {'model':<10} {'subset':<15} {'n':<6} {'exact_match%':<14} {'avg_bleu'}")
+    print("─" * 60)
+    for _, r in combined_summary.iterrows():
+        print(f"  {r['model']:<10} {r['subset']:<15} {r['n_images']:<6} {r['exact_match_pct']:<14} {r['avg_bleu']}")
+    print("─" * 60)
 
     os.makedirs(METRICS_DIR, exist_ok=True)
-    out_json = os.path.join(METRICS_DIR, f"{prompt_type}_results.json")
-    out_csv  = os.path.join(METRICS_DIR, f"{prompt_type}_results.csv")
-    with open(out_json, "w") as f:
-        json.dump(all_results, f, indent=2)
-    pd.DataFrame(all_results).to_csv(out_csv, index=False)
-    print(f"\nSaved → {out_json}")
-    print(f"Saved → {out_csv}")
+    combined_table.to_csv(
+        os.path.join(METRICS_DIR, f"{prompt_type}_results_table.csv"), index=False
+    )
+    combined_summary.to_csv(
+        os.path.join(METRICS_DIR, f"{prompt_type}_summary.csv"), index=False
+    )
+    print(f"\nSaved → {METRICS_DIR}")
 
 
 if __name__ == "__main__":

@@ -4,7 +4,6 @@ from transformers import AutoProcessor, Gemma3ForConditionalGeneration
 import os
 
 MODEL_ID = "google/gemma-3-4b-it"
-# IMAGE_PATH = "image.jpg"
 IMAGE_PATH = "image.png"
 # CACHE_DIR = "/tmp/$USER/hf-cache/hub"
 os.environ["HF_HOME"] = f"/tmp/{os.environ['USER']}/hf-cache"
