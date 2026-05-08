@@ -235,9 +235,26 @@ Copy the token URL from the server terminal and open it in your browser. Select 
 
 ## References
 
-- Papineni et al. (2002). BLEU: a method for automatic evaluation of machine translation. ACL.
-- Zhang et al. (2019). BERTScore: Evaluating Text Generation with BERT. ICLR.
-- Google. Gemma 3 model card. HuggingFace, 2024.
-- Google. Gemma 4 model card. HuggingFace, 2024.
-- Ahemateja. Traffic Sign Dataset Classification. Kaggle, 2024.
-- Rafsan. US Road Signs Object Detection. Kaggle, 2024.
+**Models**
+- Gemma Team, Google. (2024). Gemma 3: Open Models Based on Gemini Technology and Research. https://huggingface.co/google/gemma-3-4b-it
+- Gemma Team, Google. (2024). Gemma 4. https://huggingface.co/google/gemma-4-E4B-it
+
+**Literature Review and Background**
+- Hwang, J.-J., et al. (2024). EMMA: End-to-end multimodal model for autonomous driving. *arXiv preprint arXiv:2410.23262*.
+- Pandey, A., Bodo, D., Phukan, A., & Ekbal, A. (2025). The quest for visual understanding: A journey through the evolution of visual question answering. *arXiv preprint arXiv:2501.07109*.
+- Kamath, A., Ferret, J., Pathak, S., Vieillard, N., Merhej, R., Perrin, S., et al. (2025). Gemma 3 technical report. Google DeepMind. *arXiv preprint arXiv:2504.07491*.
+- Google DeepMind. (2026). Gemma 4. https://deepmind.google/models/gemma/gemma-4/
+
+**Evaluation Metrics**
+- Papineni, K., Roukos, S., Ward, T., & Zhu, W. (2002). BLEU: a method for automatic evaluation of machine translation. *Proceedings of the 40th Annual Meeting of the ACL*, 311–318.
+- Zhang, T., Kishore, V., Wu, F., Weinberger, K. Q., & Artzi, Y. (2019). BERTScore: Evaluating text generation with BERT. *arXiv preprint arXiv:1904.09675*.
+- Rajpurkar, P., et al. (2016). SQuAD: 100,000+ questions for machine comprehension of text. *EMNLP*. *(exact match normalization pattern)*
+- Liu, Y., et al. (2019). RoBERTa: A robustly optimized BERT pretraining approach. *arXiv:1907.11692*. *(underlying model used by BERTScore)*
+
+**Implementation Techniques**
+- Brown, T., et al. (2020). Language models are few-shot learners. *NeurIPS*, 33. *(zero-shot prompting)*
+- Wei, J., et al. (2022). Chain-of-thought prompting elicits reasoning in large language models. *NeurIPS*, 35. *(instruction-style prompting)*
+
+**Datasets**
+- Rafsan. (2024). US Road Signs Object Detection Model. Kaggle. https://www.kaggle.com/datasets/rafsanrudro/us-road-signs-object-detection-model-by-us
+
