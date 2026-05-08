@@ -196,8 +196,10 @@ To load both models, we are using borrowed code from HuggingFace.
 - Zhang, T., Kishore, V., Wu, F., Weinberger, K. Q., & Artzi, Y. (2019). BERTScore: Evaluating text generation with BERT. *arXiv preprint arXiv:1904.09675*.
 - Rajpurkar, P., et al. (2016). SQuAD: 100,000+ questions for machine comprehension of text. *EMNLP*. *(exact match normalization pattern)*
 - Liu, Y., et al. (2019). RoBERTa: A robustly optimized BERT pretraining approach. *arXiv:1907.11692*. *(underlying model used by BERTScore)*
+- Shi, T., & Wieting, J. (2019). BERTScore (Version 0.3.13) [Software]. PyPI. https://pypi.org/project/bert-score/
+- Bird, S., Klein, E., & Loper, E. (n.d.). bleu_score [Software module]. Natural Language Toolkit (NLTK). https://www.nltk.org/_modules/nltk/translate/bleu_score.html
 
-**Implementation Techniques**
+**Implementation**
 - Brown, T., et al. (2020). Language models are few-shot learners. *NeurIPS*, 33. *(zero-shot prompting)*
 - Wei, J., et al. (2022). Chain-of-thought prompting elicits reasoning in large language models. *NeurIPS*, 35. *(instruction-style prompting)*
 
