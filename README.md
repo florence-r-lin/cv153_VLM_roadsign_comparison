@@ -1,6 +1,6 @@
 # Investigating Effectiveness of Two Vision Language Models in Recognizing Embedded Texts in Road Signs
 
-**CS153 Computer Vision Final Project — Spring 2026**
+**CS153 Computer Vision Final Project**
 Janav Shah and Florence Lin
 
 ---
