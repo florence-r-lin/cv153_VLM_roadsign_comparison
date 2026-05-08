@@ -11,3 +11,4 @@ kaggle
 nltk
 jupyter
 ipykernel
+bert-score
