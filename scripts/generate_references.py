@@ -27,7 +27,7 @@ SCENARIO_PROMPTS = {
     ),
 }
 
-# Hand-written reference answers for key sign classes
+# LLM generated reference answers for the sign classes
 # Format: {label_name: {scenario_key: reference_answer}}
 REFERENCES = {
     "Stop": {
