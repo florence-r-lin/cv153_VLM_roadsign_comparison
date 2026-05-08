@@ -44,4 +44,16 @@ PROMPTS = {
         "What does this road sign mean? "
         "Reply with one short sentence."
     ),
+    "scenario_new_driver": (
+        "You are a new driver and see this sign at an intersection. "
+        "What action do you take? Reply with one short sentence."
+    ),
+    "scenario_highway": (
+        "You are driving at highway speed and this sign appears ahead. "
+        "What does it require you to do? Reply with one short sentence."
+    ),
+    "scenario_explain": (
+        "You are a passenger explaining this sign to someone who has never driven before. "
+        "What does it mean and why does it matter? Reply with one short sentence."
+    ),
 }
