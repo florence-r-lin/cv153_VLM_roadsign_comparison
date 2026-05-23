@@ -3,6 +3,8 @@
 **CS153 Computer Vision Final Project**
 Janav Shah and Florence Lin
 
+View our final paper write up [here](https://github.com/florence-r-lin/cv153_VLM_roadsign_comparison)
+
 ---
 
 ## Overview
